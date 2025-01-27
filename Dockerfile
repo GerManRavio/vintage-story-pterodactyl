@@ -1,25 +1,19 @@
-FROM ubuntu:latest AS downloaded
-WORKDIR /downloads
+FROM ghcr.io/pterodactyl/installers:debian AS downloaded
 
-ARG VERSION="1.20.3"
-ARG RELEASE_TYPE="stable"
+LABEL GerManRavio, <germanravio@gmail.com>
 
-RUN apt update
-RUN apt install -y wget
+RUN apt update && apt install -y curl ca-certificates openssl git tar bash sqlite3 fontconfig && useradd -m -d /home/container -s /bin/bash -r container
 
-# https://cdn.vintagestory.at/gamefiles/stable/vs_server_linux-x64_1.20.3.tar.gz
-RUN wget "https://cdn.vintagestory.at/gamefiles/${RELEASE_TYPE}/vs_server_linux-x64_${VERSION}.tar.gz"
-RUN tar xzf "vs_server_linux-x64_${VERSION}.tar.gz"
-RUN rm "vs_server_linux-x64_${VERSION}.tar.gz"
+USER container
+ENV  USER=container HOME=/home/container
 
-# Run server
-FROM mcr.microsoft.com/dotnet/runtime:7.0 AS base
 WORKDIR /home/container
 
-COPY --from=downloaded /downloads /home/container
+FROM mcr.microsoft.com/dotnet/runtime:7.0 AS base
 
-VOLUME [ "/home/container" ]
+COPY ./entrypoint.sh /entrypoint.sh
+
+CMD ["/bin/bash", "/entrypoint.sh"]
+
 RUN chmod +x ./VintagestoryServer
 
-EXPOSE 42420/tcp
-CMD ./VintagestoryServer --dataPath ./data
