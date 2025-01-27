@@ -14,6 +14,3 @@ FROM mcr.microsoft.com/dotnet/runtime:7.0 AS base
 COPY ./entrypoint.sh /entrypoint.sh
 
 CMD ["/bin/bash", "/entrypoint.sh"]
-
-RUN chmod +x ./VintagestoryServer
-
